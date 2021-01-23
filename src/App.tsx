@@ -13,9 +13,10 @@ recognition.lang = "en-US";
 
 type Props = {};
 type State = {
-  listening: boolean,
-  listeningResult: string,
-  monologueText: string,
+  listening: boolean;
+  interimResult: string;
+  finalResult: string;
+  monologueText: string;
 };
 
 class Speech extends Component<Props, State> {
@@ -23,7 +24,8 @@ class Speech extends Component<Props, State> {
     super(props);
     this.state = {
       listening: false,
-      listeningResult: "",
+      interimResult: "",
+      finalResult: "",
       monologueText: "",
     };
   }
@@ -34,19 +36,23 @@ class Speech extends Component<Props, State> {
     this.setState({ monologueText: event.target.value });
   };
 
-  toggleListen = () => {
+  toggleListenButton = () => {
     this.setState(
       {
         listening: !this.state.listening,
       },
-      this.handleListen
+      this.setRecognitionCallbacls
     );
   };
 
-  handleListen = () => {
+  setRecognitionCallbacls = () => {
     console.log("listening?", this.state.listening);
 
     if (this.state.listening) {
+      this.setState({
+        interimResult: "",
+        finalResult: "",
+      });
       recognition.start();
       recognition.onend = () => {
         console.log("...continue listening...");
@@ -63,43 +69,22 @@ class Speech extends Component<Props, State> {
       console.log("Listening!");
     };
 
-    let finalTranscript = "";
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let interimTranscript = "";
+      const { finalResult } = this.state;
+      var interimResultLocal = "";
+      var finalResultLocal = finalResult;
 
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) finalTranscript += transcript + " ";
-        else interimTranscript += transcript;
+      for (var i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalResultLocal += event.results[i][0].transcript;
+        } else {
+          interimResultLocal += event.results[i][0].transcript;
+        }
       }
-      const interim_item = document.getElementById("interim");
-      if (interim_item) {
-        interim_item.innerHTML = interimTranscript;
-      }
-
-      const final_item = document.getElementById("final");
-      if (final_item) {
-        final_item.innerHTML = finalTranscript;
-      }
-
-      //-------------------------COMMANDS------------------------------------
-
-      const transcriptArr = finalTranscript.split(" ");
-      const stopCmd = transcriptArr.slice(-3, -1);
-      console.log("stopCmd", stopCmd);
-
-      if (stopCmd[0] === "stop" && stopCmd[1] === "listening") {
-        recognition.stop();
-        recognition.onend = () => {
-          console.log("Stopped listening per command");
-          const finalText = transcriptArr.slice(0, -3).join(" ");
-
-          const final_item = document.getElementById("final");
-          if (final_item) {
-            final_item.innerHTML = finalText;
-          }
-        };
-      }
+      this.setState({
+        interimResult: interimResultLocal,
+        finalResult: finalResultLocal,
+      });
     };
 
     //-----------------------------------------------------------------------
@@ -112,7 +97,7 @@ class Speech extends Component<Props, State> {
   renderListeningDisplayBox = () => {};
 
   render() {
-    const { listening } = this.state;
+    const { listening, interimResult, finalResult } = this.state;
     const textAreaDimensions = { width: 500, height: 200 };
     return (
       <div
@@ -132,9 +117,14 @@ class Speech extends Component<Props, State> {
             hidden={listening}
           ></textarea>
         </div>
-        
-        <div style={textAreaDimensions} id="interim">
 
+        <div style={textAreaDimensions} id="interim">
+          <span id="interim_span" style={{color: "black"}}>
+            {finalResult}
+          </span>
+          <span id="interim_span" style={{color: "gray"}}>
+            {interimResult}
+          </span>
         </div>
 
         <button
@@ -146,28 +136,8 @@ class Speech extends Component<Props, State> {
             borderRadius: "50%",
             margin: "6em 0 2em 0",
           }}
-          onClick={this.toggleListen}
+          onClick={this.toggleListenButton}
         />
-        <div
-          id="interim"
-          style={{
-            color: "gray",
-            border: "#ccc 1px solid",
-            padding: "1em",
-            margin: "1em",
-            width: "300px",
-          }}
-        ></div>
-        <div
-          id="final"
-          style={{
-            color: "black",
-            border: "#ccc 1px solid",
-            padding: "1em",
-            margin: "1em",
-            width: "300px",
-          }}
-        ></div>
       </div>
     );
   }
