@@ -1,26 +1,22 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+export interface IWindow extends Window {
+  webkitSpeechRecognition: any;
+}
+const {webkitSpeechRecognition} = (window as any);
+
+// const speachRecognition: any = SpeechRecognition || webkitSpeechRecognition
+const recognition = new webkitSpeechRecognition()
+
+recognition.continuous = true
+recognition.interimResults = true
+recognition.lang = 'en-US'
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <text>{recognition.lang}</text>
     </div>
-  );
+  )
 }
 
 export default App;
