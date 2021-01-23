@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { diffWords } from "diff";
+
 export interface IWindow extends Window {
   webkitSpeechRecognition: any;
 }
@@ -94,11 +96,24 @@ class Speech extends Component<Props, State> {
     };
   };
 
-  renderListeningDisplayBox = () => {};
+  calculateDiff = () => {
+    const { monologueText, finalResult } = this.state;
+    var diff = diffWords(monologueText, finalResult);
+
+    var lastNonRemovedIndex = 0;
+    diff.forEach((part, i) => {
+      if (!part.removed) {
+        lastNonRemovedIndex = i + 1;
+      }
+    });
+
+    return diff.slice(0, lastNonRemovedIndex);
+  };
 
   render() {
     const { listening, interimResult, finalResult } = this.state;
-    const textAreaDimensions = { width: 500, height: 200, padding:20};
+    const textAreaDimensions = { width: 500, height: 200, padding: 20 };
+    const diff = this.calculateDiff();
     return (
       <div
         style={{
@@ -119,10 +134,17 @@ class Speech extends Component<Props, State> {
         </div>
 
         <div style={textAreaDimensions} id="interim">
-          <span id="interim_span" style={{color: "black"}}>
-            {finalResult}
-          </span>
-          <span id="interim_span" style={{color: "gray"}}>
+          {diff.map((part) => {
+            // green for additions, red for deletions
+            // black for common parts
+            const color = part.added ? "green" : part.removed ? "red" : "black";
+            return (
+              <span id="interim_span" style={{ color }}>
+                {part.value}
+              </span>
+            );
+          })}
+          <span id="interim_span" style={{ color: "gray" }}>
             {interimResult}
           </span>
         </div>
