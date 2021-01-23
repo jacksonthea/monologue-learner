@@ -56,10 +56,6 @@ class Speech extends Component<Props, State> {
         finalResult: "",
       });
       recognition.start();
-      recognition.onend = () => {
-        console.log("...continue listening...");
-        recognition.start();
-      };
     } else {
       recognition.stop();
       recognition.onend = () => {
@@ -96,9 +92,24 @@ class Speech extends Component<Props, State> {
     };
   };
 
+  normalizeString = (val: string) => {
+    return val
+      // remove punctuation
+      .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "")
+      // remove extra spaces
+      .replace(/\s{2,}/g, " ")
+      // replace weird apostrophes
+      .replace('’', '\'')
+      .replace('’', '\'')
+      .toLowerCase();
+  };
+
   calculateDiff = () => {
     const { monologueText, finalResult } = this.state;
-    var diff = diffWords(monologueText, finalResult);
+    var diff = diffWords(
+      this.normalizeString(monologueText),
+      this.normalizeString(finalResult)
+    );
 
     var lastNonRemovedIndex = 0;
     diff.forEach((part, i) => {
@@ -111,7 +122,7 @@ class Speech extends Component<Props, State> {
   };
 
   render() {
-    const { listening, interimResult, finalResult } = this.state;
+    const { listening, interimResult } = this.state;
     const textAreaDimensions = { width: 500, height: 200, padding: 20 };
     const diff = this.calculateDiff();
     return (
@@ -132,19 +143,28 @@ class Speech extends Component<Props, State> {
             hidden={listening}
           ></textarea>
         </div>
+        
+        {/* <div style={textAreaDimensions}>
+          <span style={{ color: "black" }}>
+            {this.state.finalResult}
+          </span>
+          <span style={{ color: "gray" }}>
+            {interimResult}
+          </span>
+        </div> */}
 
-        <div style={textAreaDimensions} id="interim">
-          {diff.map((part) => {
+        <div style={textAreaDimensions}>
+          {diff.map((part, i) => {
             // green for additions, red for deletions
             // black for common parts
             const color = part.added ? "green" : part.removed ? "red" : "black";
             return (
-              <span id="interim_span" style={{ color }}>
+              <span style={{ color }} key={i}>
                 {part.value}
               </span>
             );
           })}
-          <span id="interim_span" style={{ color: "gray" }}>
+          <span style={{ color: "gray" }}>
             {interimResult}
           </span>
         </div>
