@@ -13,8 +13,9 @@ recognition.lang = "en-US";
 
 type Props = {};
 type State = {
-  listening: boolean;
-  monologueText: string;
+  listening: boolean,
+  listeningResult: string,
+  monologueText: string,
 };
 
 class Speech extends Component<Props, State> {
@@ -22,10 +23,9 @@ class Speech extends Component<Props, State> {
     super(props);
     this.state = {
       listening: false,
+      listeningResult: "",
       monologueText: "",
     };
-    // this.toggleListen = this.toggleListen.bind(this);
-    // this.handleListen = this.handleListen.bind(this);
   }
 
   handleChangeMonologueText = (
@@ -109,7 +109,11 @@ class Speech extends Component<Props, State> {
     };
   };
 
+  renderListeningDisplayBox = () => {};
+
   render() {
+    const { listening } = this.state;
+    const textAreaDimensions = { width: 500, height: 200 };
     return (
       <div
         style={{
@@ -119,18 +123,26 @@ class Speech extends Component<Props, State> {
           textAlign: "center",
         }}
       >
-        <textarea
-          id="monologue-text"
-          value={this.state.monologueText}
-          onChange={this.handleChangeMonologueText}
-          style={{ resize: "none", width: 500, height: 200 }}
-        ></textarea>
+        <div style={textAreaDimensions}>
+          <textarea
+            id="monologue-text"
+            value={this.state.monologueText}
+            onChange={this.handleChangeMonologueText}
+            style={{ width: "100%", height: "100%", resize: "none" }}
+            hidden={listening}
+          ></textarea>
+        </div>
+        
+        <div style={textAreaDimensions} id="interim">
+
+        </div>
+
         <button
           id="microphone-btn"
           style={{
             width: "60px",
             height: "60px",
-            background: "lightblue",
+            background: listening ? "red" : "lightblue",
             borderRadius: "50%",
             margin: "6em 0 2em 0",
           }}
