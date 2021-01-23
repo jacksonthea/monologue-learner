@@ -143,15 +143,6 @@ class Speech extends Component<Props, State> {
             hidden={listening}
           ></textarea>
         </div>
-        
-        {/* <div style={textAreaDimensions}>
-          <span style={{ color: "black" }}>
-            {this.state.finalResult}
-          </span>
-          <span style={{ color: "gray" }}>
-            {interimResult}
-          </span>
-        </div> */}
 
         <div style={textAreaDimensions}>
           {diff.map((part, i) => {
