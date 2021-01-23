@@ -98,7 +98,7 @@ class Speech extends Component<Props, State> {
 
   render() {
     const { listening, interimResult, finalResult } = this.state;
-    const textAreaDimensions = { width: 500, height: 200 };
+    const textAreaDimensions = { width: 500, height: 200, padding:20};
     return (
       <div
         style={{
